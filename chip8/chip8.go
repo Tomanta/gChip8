@@ -1,32 +1,111 @@
 package chip8
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type Chip8 struct {
-	memory      [4096]byte
-	Display     [64][32]bool // A 64 x 32 matrix of which pixels are turned on
-	pc          uint16       // Program counter
-	index       uint16       // Index register, points to memory locations
-	stack       []uint16
-	timer       int      // Decrements 60 times per second until reaching 0
-	sound_timer int8     // Gives beep as long as not 0
-	variables   [16]int8 // Variable registers, may need to change this
+	Memory       [4096]byte
+	Display      [64][32]bool // A 64 x 32 matrix of which pixels are turned on
+	PC           uint16       // Program counter
+	Index        uint16       // Index register, points to memory locations
+	Stack        []uint16
+	cpuTimer     uint8 // Decrements 60 times per second until reaching 0
+	delayTimer   uint8 // Gives beep as long as not 0
+	timeStart    time.Time
+	tickDuration time.Duration
+	Registers    [16]int8 // Variable registers, may need to change this
 }
 
-func NewChip8FromFile(filepath string) (Chip8, error) {
-	return Chip8{}, fmt.Errorf("not yet implemented")
-}
-
+// NewChip8FromByte takes a slice of bytes and returns a Chip8 emulator with default settings
+// and the ROM loaded into memory
 func NewChip8FromByte(rom []byte) (Chip8, error) {
 	if len(rom) == 0 {
 		return Chip8{}, fmt.Errorf("no rom data provided")
 	}
 
 	c := Chip8{
-		pc: 0x200,
+		PC:           0x200,
+		tickDuration: time.Second / 60,
 	}
+
 	for i, byt := range rom {
-		c.memory[0x200+i] = byt
+		c.Memory[0x200+i] = byt
 	}
 	return c, nil
+}
+
+// Update will process the next instruction. If more than a second has passed since the last tick
+// it will advance the delay and sound timers. It is recommended to run this loop around 700 times
+// per second for most purposes but it should be configured. This does not handle exact cycle timing.
+// Note that on a very slow process such as stepping through instructions the timers will still only
+// count down at most once per execution.
+func (c *Chip8) Update() error {
+	if time.Since(c.timeStart) > c.tickDuration {
+		if c.cpuTimer > 0 {
+			c.cpuTimer -= 1
+		}
+
+		if c.delayTimer > 0 {
+			c.delayTimer -= 1
+		}
+		c.timeStart = time.Now() // start the new tick
+	}
+	instruction, err := c.fetch()
+	if err != nil {
+		return err
+	}
+
+	err = c.execute((instruction))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// fetch the next instruction
+func (c *Chip8) fetch() (uint16, error) {
+	if (int)(c.PC+2) > len(c.Memory) {
+		return 0, fmt.Errorf("out of memory! program counter at: %d", c.PC)
+	}
+
+	instruction := uint16FromTwoBytes(c.Memory[c.PC], c.Memory[c.PC+1])
+	c.PC = c.PC + 2 // Increment the program counter to the next instruction
+	return instruction, nil
+}
+
+// process the instruction
+func (c *Chip8) execute(instruction uint16) error {
+	fmt.Printf("DEBUG: instruction: %04X\n", instruction)
+	switch instruction & 0xF000 {
+	case 0x0000:
+		switch instruction {
+		case 0x00E0:
+			c.clearDisplay()
+		default: // We explicity ignore any other 0x000 instruction
+			return nil
+		}
+	case 0x1000:
+		c.jump(instruction & 0x0FFF)
+	default:
+		return fmt.Errorf("unknown instruction: %04X", instruction)
+	}
+	return nil
+}
+
+// Combine two bytes to make a uint16
+func uint16FromTwoBytes(leftByte, rightByte byte) uint16 {
+	return (uint16)(leftByte)<<8 | (uint16)(rightByte)
+}
+
+// clear the screen
+func (c *Chip8) clearDisplay() {
+	var blankDisplay [64][32]bool
+	c.Display = blankDisplay
+}
+
+func (c *Chip8) jump(location uint16) {
+	c.PC = location
 }

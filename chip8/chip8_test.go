@@ -1,44 +1,121 @@
 package chip8
 
 import (
-	"fmt"
 	"os"
 	"reflect"
 	"testing"
 )
 
 const (
-	StartProgramCounter uint16 = 0x200
-	StartRomMemory      uint16 = 0x200
+	StartProgramCounter    uint16 = 0x200
+	StartRomMemoryLocation uint16 = 0x200
 )
 
-func openTestRom() []byte {
-	data, err := os.ReadFile("../roms/ibm_logo.ch8")
+func openTestRom(t testing.TB) []byte {
+	t.Helper()
+	testRom := "../roms/ibm_logo.ch8"
+	data, err := os.ReadFile(testRom)
 	if err != nil {
-		panic(err)
+		t.Fatalf("could not open test rom '%s', received error: %v", testRom, err)
 	}
 	return data
 }
 
-func TestCanCreateFromBytes(t *testing.T) {
-	romData := openTestRom()
-	romDataLength := uint16(len(romData))
-	fmt.Printf("want length: %d\n\n", len(romData))
-	got, err := NewChip8FromByte(romData)
+func getIBMEmulator(t testing.TB) Chip8 {
+	t.Helper()
+	romData := openTestRom(t)
 
+	emu, err := NewChip8FromByte(romData)
 	if err != nil {
-		t.Errorf("Received error creating file: %q", err)
+		t.Fatalf("could not get emulator from rom file, received: %v", err)
+	}
+	return emu
+}
+
+func TestCanCreateFromBytes(t *testing.T) {
+	t.Run("can load a rom file to memory", func(t *testing.T) {
+		romData := openTestRom(t)
+		romDataLength := uint16(len(romData))
+		got, err := NewChip8FromByte(romData)
+
+		if err != nil {
+			t.Fatalf("Received error creating file: %v", err)
+		}
+
+		gotr := got.Memory[StartRomMemoryLocation : StartRomMemoryLocation+romDataLength]
+
+		if !reflect.DeepEqual(gotr, romData) {
+			t.Errorf("ROM not loaded to memory. want %X, got %X", romData, gotr)
+		}
+	})
+
+	t.Run("empty rom returns error", func(t *testing.T) {
+		romData := []byte{}
+		_, err := NewChip8FromByte(romData)
+		if err == nil {
+			t.Fatalf("expected error, did not receive one")
+		}
+	})
+
+	t.Run("program counter set to 0x200", func(t *testing.T) {
+		want := 0x200
+		chip8 := getIBMEmulator(t)
+		if chip8.PC != 0x200 {
+			t.Errorf("program counter not set. want %X, got %X", want, chip8.PC)
+		}
+	})
+
+	t.Run("initial display is blank", func(t *testing.T) {
+		want := [64][32]bool{}
+		got := getIBMEmulator(t).Display
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("display not blank")
+		}
+	})
+}
+
+func TestCanFetchInstructions(t *testing.T) {
+	emu := getIBMEmulator(t)
+	emu.Update()
+	var wantPC uint16 = 0x0202
+	var wantInstr uint8 = 0xA2
+
+	if emu.PC != wantPC {
+		t.Errorf("program counter not advanced, wanted %X, got %X", wantPC, emu.PC)
 	}
 
-	gotr := got.memory[StartRomMemory : StartRomMemory+romDataLength]
-	fmt.Printf("gotr length: %d", len(gotr))
-
-	if !reflect.DeepEqual(gotr, romData) {
-		t.Errorf("ROM not loaded to memory. want %X, got %X", romData, gotr)
+	if emu.Memory[emu.PC] != wantInstr {
+		t.Errorf("instruction at next program counter incorrect, wanted %X, got %X", wantInstr, emu.Memory[emu.PC])
 	}
+}
 
-	if got.pc != StartProgramCounter {
-		t.Errorf("Program counter not set: want %X, got %X", StartProgramCounter, got.pc)
+func TestHasClearScreen(t *testing.T) {
+	var want [64][32]bool
+	var dirtyDisplay [64][32]bool
+	dirtyDisplay[5][1] = true
+
+	emu := getIBMEmulator(t)
+	emu.Display = dirtyDisplay
+	emu.Update()
+	got := emu.Display
+	if !reflect.DeepEqual(got, want) {
+		t.Error("0x00E0 instruction did not clear display")
 	}
+}
 
+func TestHasJumpInstruction(t *testing.T) {
+	rom := []byte{0x12, 0x34}
+	emu, _ := NewChip8FromByte(rom)
+	var want uint16 = 0x0234
+
+	err := emu.Update()
+	if err != nil {
+		t.Fatalf("received unexpected error: %v", err)
+	}
+	got := emu.PC
+
+	if emu.PC != want {
+		t.Errorf("1NNN instruction did not advance program counter, wanted %X, got %X", want, got)
+	}
 }
