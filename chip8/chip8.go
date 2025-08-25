@@ -10,12 +10,14 @@ type Chip8 struct {
 	Display      [64][32]bool // A 64 x 32 matrix of which pixels are turned on
 	PC           uint16       // Program counter
 	Index        uint16       // Index register, points to memory locations
-	Stack        []uint16
+	Stack        [16]uint16
 	cpuTimer     uint8 // Decrements 60 times per second until reaching 0
 	delayTimer   uint8 // Gives beep as long as not 0
 	timeStart    time.Time
 	tickDuration time.Duration
 	Registers    [16]int8 // Variable registers, may need to change this
+
+	stackPointer int
 }
 
 // NewChip8FromByte takes a slice of bytes and returns a Chip8 emulator with default settings
@@ -78,34 +80,23 @@ func (c *Chip8) fetch() (uint16, error) {
 
 // process the instruction
 func (c *Chip8) execute(instruction uint16) error {
-	fmt.Printf("DEBUG: instruction: %04X\n", instruction)
 	switch instruction & 0xF000 {
 	case 0x0000:
 		switch instruction {
 		case 0x00E0:
 			c.clearDisplay()
+		case 0x00EE:
+			c.stackPop()
 		default: // We explicity ignore any other 0x000 instruction
 			return nil
 		}
 	case 0x1000:
 		c.jump(instruction & 0x0FFF)
+	case 0x2000:
+		c.stackPush(c.PC)
+		c.PC = instruction & 0x0FFF
 	default:
 		return fmt.Errorf("unknown instruction: %04X", instruction)
 	}
 	return nil
-}
-
-// Combine two bytes to make a uint16
-func uint16FromTwoBytes(leftByte, rightByte byte) uint16 {
-	return (uint16)(leftByte)<<8 | (uint16)(rightByte)
-}
-
-// clear the screen
-func (c *Chip8) clearDisplay() {
-	var blankDisplay [64][32]bool
-	c.Display = blankDisplay
-}
-
-func (c *Chip8) jump(location uint16) {
-	c.PC = location
 }

@@ -119,3 +119,54 @@ func TestHasJumpInstruction(t *testing.T) {
 		t.Errorf("1NNN instruction did not advance program counter, wanted %X, got %X", want, got)
 	}
 }
+
+func TestErrorsOnBadInstruction(t *testing.T) {
+	rom := []byte{0xF0, 0xF0}
+	emu, _ := NewChip8FromByte(rom)
+	err := emu.Update()
+	if err == nil {
+		t.Errorf("expected error, recieved nil")
+	}
+}
+
+func TestSubroutine(t *testing.T) {
+	rom := []byte{0x23, 0x4F}
+	t.Run("pushes correct address onto stack", func(t *testing.T) {
+		emu, _ := NewChip8FromByte(rom)
+		emu.Update()
+		var stack_want uint16 = 0x0202
+		var pc_want uint16 = 0x034F
+		stack_got := emu.Stack[0]
+		pc_got := emu.PC
+
+		if stack_got != stack_want {
+			t.Errorf("expected stack[0] to have 0x%03X, got 0x%03X", stack_want, stack_got)
+		}
+
+		if pc_want != pc_got {
+			t.Errorf("expected program counter 0x%03X, got 0x%03X", pc_want, pc_got)
+		}
+	})
+
+	t.Run("popping stack returns to correct pointer", func(t *testing.T) {
+		emu, _ := NewChip8FromByte(rom)
+		// rig the stack
+		emu.Memory[0x034F] = 0x00
+		emu.Memory[0x034F+1] = 0xEE
+		emu.Update()
+		emu.Update()
+		var pc_want uint16 = 0x0202
+		var stack_want uint16 = 0x000
+		pc_got := emu.PC
+		stack_got := emu.Stack[0]
+
+		if stack_got != stack_want {
+			t.Errorf("expected stack[0] to have 0x%03X, got 0x%03X", stack_want, stack_got)
+		}
+
+		if pc_got != pc_want {
+			t.Errorf("expected program counter to have 0x%03X, got 0x%03X", pc_want, pc_got)
+		}
+
+	})
+}
