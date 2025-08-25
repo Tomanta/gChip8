@@ -121,7 +121,7 @@ func TestHasJumpInstruction(t *testing.T) {
 }
 
 func TestErrorsOnBadInstruction(t *testing.T) {
-	rom := []byte{0xF0, 0xF0}
+	rom := []byte{0xFF, 0xFF}
 	emu, _ := NewChip8FromByte(rom)
 	err := emu.Update()
 	if err == nil {
