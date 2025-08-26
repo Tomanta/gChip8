@@ -103,6 +103,8 @@ func (c *Chip8) execute(instruction uint16) error {
 		c.PC = nnn
 	case 0x6000:
 		c.setRegister((int)(x), nn)
+	case 0x7000:
+		c.addRegister((int)(x), nn)
 	default:
 		return fmt.Errorf("unknown instruction: %04X", instruction)
 	}

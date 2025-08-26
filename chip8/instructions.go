@@ -38,3 +38,12 @@ func (c *Chip8) setRegister(register int, value uint8) error {
 	c.Registers[register] = value
 	return nil
 }
+
+func (c *Chip8) addRegister(register int, value uint8) error {
+	if register < 0 || register > 15 {
+		return fmt.Errorf("invalid register: %d", register)
+	}
+
+	c.Registers[register] = c.Registers[register] + value
+	return nil
+}

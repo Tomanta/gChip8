@@ -140,6 +140,36 @@ func TestCanSetRegister(t *testing.T) {
 	if got != want {
 		t.Errorf("expected register 1 to contain 0x%02X, got 0x%02X", want, got)
 	}
+}
+
+func TestCanAddRegister(t *testing.T) {
+	t.Run("can add basic register", func(t *testing.T) {
+		rom := []byte{0x61, 0x82, 0x71, 0x11}
+		emu, _ := NewChip8FromByte(rom)
+		emu.Update()
+		emu.Update()
+
+		var want uint8 = 0x82 + 0x11
+		got := emu.Registers[1]
+
+		if got != want {
+			t.Errorf("expected register 1 to contain 0x%02X, got 0x%02X", want, got)
+		}
+	})
+
+	t.Run("overflow does not set overflow flag", func(t *testing.T) {
+		rom := []byte{0x61, 0xFF, 0x71, 0x01}
+		emu, _ := NewChip8FromByte(rom)
+		emu.Update()
+		emu.Update()
+
+		var want uint8 = 0x00
+		got := emu.Registers[1]
+
+		if got != want {
+			t.Errorf("expected register 1 to contain 0x%02X, got 0x%02X", want, got)
+		}
+	})
 
 }
 
