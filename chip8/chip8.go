@@ -15,7 +15,7 @@ type Chip8 struct {
 	delayTimer   uint8 // Gives beep as long as not 0
 	timeStart    time.Time
 	tickDuration time.Duration
-	Registers    [16]int8 // Variable registers, may need to change this
+	Registers    [16]uint8 // Variable registers, may need to change this
 
 	stackPointer int
 }
@@ -80,6 +80,12 @@ func (c *Chip8) fetch() (uint16, error) {
 
 // process the instruction
 func (c *Chip8) execute(instruction uint16) error {
+	x := (uint8)(instruction & 0x0F00 >> 8)
+	//	y := (uint8)(instruction & 0x00F0 >> 4)
+	// n := (uint8)(instruction & 0x000F)
+	nn := (uint8)(instruction & 0x00FF)
+	nnn := (uint16)(instruction & 0x0FFF)
+
 	switch instruction & 0xF000 {
 	case 0x0000:
 		switch instruction {
@@ -91,10 +97,12 @@ func (c *Chip8) execute(instruction uint16) error {
 			return nil
 		}
 	case 0x1000:
-		c.jump(instruction & 0x0FFF)
+		c.jump(nnn)
 	case 0x2000:
 		c.stackPush(c.PC)
-		c.PC = instruction & 0x0FFF
+		c.PC = nnn
+	case 0x6000:
+		c.setRegister((int)(x), nn)
 	default:
 		return fmt.Errorf("unknown instruction: %04X", instruction)
 	}

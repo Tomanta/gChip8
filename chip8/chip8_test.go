@@ -129,6 +129,20 @@ func TestErrorsOnBadInstruction(t *testing.T) {
 	}
 }
 
+func TestCanSetRegister(t *testing.T) {
+	rom := []byte{0x61, 0x82}
+	emu, _ := NewChip8FromByte(rom)
+	emu.Update()
+
+	var want uint8 = 0x82
+	got := emu.Registers[1]
+
+	if got != want {
+		t.Errorf("expected register 1 to contain 0x%02X, got 0x%02X", want, got)
+	}
+
+}
+
 func TestSubroutine(t *testing.T) {
 	rom := []byte{0x23, 0x4F}
 	t.Run("pushes correct address onto stack", func(t *testing.T) {

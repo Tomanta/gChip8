@@ -1,5 +1,7 @@
 package chip8
 
+import "fmt"
+
 // clear the screen
 func (c *Chip8) clearDisplay() {
 	var blankDisplay [64][32]bool
@@ -9,6 +11,7 @@ func (c *Chip8) clearDisplay() {
 func (c *Chip8) jump(location uint16) {
 	c.PC = location
 }
+
 func (c *Chip8) stackPush(address uint16) {
 	if c.stackPointer == len(c.Stack) {
 		panic("stack overflow!")
@@ -25,5 +28,13 @@ func (c *Chip8) stackPop() {
 	c.stackPointer -= 1
 	c.PC = c.Stack[c.stackPointer]
 	c.Stack[c.stackPointer] = 0
+}
 
+func (c *Chip8) setRegister(register int, value uint8) error {
+	if register < 0 || register > 15 {
+		return fmt.Errorf("invalid register: %d", register)
+	}
+
+	c.Registers[register] = value
+	return nil
 }
