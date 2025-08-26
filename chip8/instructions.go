@@ -12,7 +12,8 @@ func (c *Chip8) jump(location uint16) {
 	c.PC = location
 }
 
-func (c *Chip8) stackPush(address uint16) {
+// op2NNN adds NNN to the stack
+func (c *Chip8) op2NNN(address uint16) {
 	if c.stackPointer == len(c.Stack) {
 		panic("stack overflow!")
 	}
@@ -30,7 +31,8 @@ func (c *Chip8) stackPop() {
 	c.Stack[c.stackPointer] = 0
 }
 
-func (c *Chip8) setRegister(register int, value uint8) error {
+// op6XNN sets register X to NN
+func (c *Chip8) op6XNN(register int, value uint8) error {
 	if register < 0 || register > 15 {
 		return fmt.Errorf("invalid register: %d", register)
 	}
@@ -39,11 +41,17 @@ func (c *Chip8) setRegister(register int, value uint8) error {
 	return nil
 }
 
-func (c *Chip8) addRegister(register int, value uint8) error {
+// op7XNN adds NN to register X. It does not set the overflow flag.
+func (c *Chip8) op7XNN(register int, value uint8) error {
 	if register < 0 || register > 15 {
 		return fmt.Errorf("invalid register: %d", register)
 	}
 
 	c.Registers[register] = c.Registers[register] + value
 	return nil
+}
+
+// opANNN sets the Index register to value
+func (c *Chip8) opANNN(value uint16) {
+	c.Index = value
 }

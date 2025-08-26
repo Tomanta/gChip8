@@ -80,11 +80,11 @@ func (c *Chip8) fetch() (uint16, error) {
 
 // process the instruction
 func (c *Chip8) execute(instruction uint16) error {
-	x := (uint8)(instruction & 0x0F00 >> 8)
-	//	y := (uint8)(instruction & 0x00F0 >> 4)
-	// n := (uint8)(instruction & 0x000F)
-	nn := (uint8)(instruction & 0x00FF)
-	nnn := (uint16)(instruction & 0x0FFF)
+	X := (uint8)(instruction & 0x0F00 >> 8)
+	// Y := (uint8)(instruction & 0x00F0 >> 4)
+	// N := (uint8)(instruction & 0x000F)
+	NN := (uint8)(instruction & 0x00FF)
+	NNN := (uint16)(instruction & 0x0FFF)
 
 	switch instruction & 0xF000 {
 	case 0x0000:
@@ -97,14 +97,16 @@ func (c *Chip8) execute(instruction uint16) error {
 			return nil
 		}
 	case 0x1000:
-		c.jump(nnn)
+		c.jump(NNN)
 	case 0x2000:
-		c.stackPush(c.PC)
-		c.PC = nnn
+		c.op2NNN(c.PC)
+		c.PC = NNN
 	case 0x6000:
-		c.setRegister((int)(x), nn)
+		c.op6XNN((int)(X), NN)
 	case 0x7000:
-		c.addRegister((int)(x), nn)
+		c.op7XNN((int)(X), NN)
+	case 0xA000:
+		c.opANNN(NNN)
 	default:
 		return fmt.Errorf("unknown instruction: %04X", instruction)
 	}

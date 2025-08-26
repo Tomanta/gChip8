@@ -90,7 +90,16 @@ func TestCanFetchInstructions(t *testing.T) {
 	}
 }
 
-func TestHasClearScreen(t *testing.T) {
+func TestErrorsOnBadInstruction(t *testing.T) {
+	rom := []byte{0xFF, 0xFF}
+	emu, _ := NewChip8FromByte(rom)
+	err := emu.Update()
+	if err == nil {
+		t.Errorf("expected error, recieved nil")
+	}
+}
+
+func TestOp00E0(t *testing.T) {
 	var want [64][32]bool
 	var dirtyDisplay [64][32]bool
 	dirtyDisplay[5][1] = true
@@ -104,7 +113,30 @@ func TestHasClearScreen(t *testing.T) {
 	}
 }
 
-func TestHasJumpInstruction(t *testing.T) {
+func TestOp00EE(t *testing.T) {
+	rom := []byte{0x23, 0x4F}
+	emu, _ := NewChip8FromByte(rom)
+	// rig the stack
+	emu.Memory[0x034F] = 0x00
+	emu.Memory[0x034F+1] = 0xEE
+	emu.Update()
+	emu.Update()
+	var pc_want uint16 = 0x0202
+	var stack_want uint16 = 0x000
+	pc_got := emu.PC
+	stack_got := emu.Stack[0]
+
+	if stack_got != stack_want {
+		t.Errorf("expected stack[0] to have 0x%03X, got 0x%03X", stack_want, stack_got)
+	}
+
+	if pc_got != pc_want {
+		t.Errorf("expected program counter to have 0x%03X, got 0x%03X", pc_want, pc_got)
+	}
+
+}
+
+func TestOp1NNN(t *testing.T) {
 	rom := []byte{0x12, 0x34}
 	emu, _ := NewChip8FromByte(rom)
 	var want uint16 = 0x0234
@@ -120,16 +152,26 @@ func TestHasJumpInstruction(t *testing.T) {
 	}
 }
 
-func TestErrorsOnBadInstruction(t *testing.T) {
-	rom := []byte{0xFF, 0xFF}
+func TestOp2NNN(t *testing.T) {
+	rom := []byte{0x23, 0x4F}
 	emu, _ := NewChip8FromByte(rom)
-	err := emu.Update()
-	if err == nil {
-		t.Errorf("expected error, recieved nil")
+	emu.Update()
+	var stack_want uint16 = 0x0202
+	var pc_want uint16 = 0x034F
+	stack_got := emu.Stack[0]
+	pc_got := emu.PC
+
+	if stack_got != stack_want {
+		t.Errorf("expected stack[0] to have 0x%03X, got 0x%03X", stack_want, stack_got)
 	}
+
+	if pc_want != pc_got {
+		t.Errorf("expected program counter 0x%03X, got 0x%03X", pc_want, pc_got)
+	}
+
 }
 
-func TestCanSetRegister(t *testing.T) {
+func TestOp6XNN(t *testing.T) {
 	rom := []byte{0x61, 0x82}
 	emu, _ := NewChip8FromByte(rom)
 	emu.Update()
@@ -142,7 +184,7 @@ func TestCanSetRegister(t *testing.T) {
 	}
 }
 
-func TestCanAddRegister(t *testing.T) {
+func TestOp7XNN(t *testing.T) {
 	t.Run("can add basic register", func(t *testing.T) {
 		rom := []byte{0x61, 0x82, 0x71, 0x11}
 		emu, _ := NewChip8FromByte(rom)
@@ -170,47 +212,16 @@ func TestCanAddRegister(t *testing.T) {
 			t.Errorf("expected register 1 to contain 0x%02X, got 0x%02X", want, got)
 		}
 	})
-
 }
 
-func TestSubroutine(t *testing.T) {
-	rom := []byte{0x23, 0x4F}
-	t.Run("pushes correct address onto stack", func(t *testing.T) {
-		emu, _ := NewChip8FromByte(rom)
-		emu.Update()
-		var stack_want uint16 = 0x0202
-		var pc_want uint16 = 0x034F
-		stack_got := emu.Stack[0]
-		pc_got := emu.PC
+func TestOpANNN(t *testing.T) {
+	rom := []byte{0xA1, 0x22}
+	emu, _ := NewChip8FromByte(rom)
+	emu.Update()
 
-		if stack_got != stack_want {
-			t.Errorf("expected stack[0] to have 0x%03X, got 0x%03X", stack_want, stack_got)
-		}
-
-		if pc_want != pc_got {
-			t.Errorf("expected program counter 0x%03X, got 0x%03X", pc_want, pc_got)
-		}
-	})
-
-	t.Run("popping stack returns to correct pointer", func(t *testing.T) {
-		emu, _ := NewChip8FromByte(rom)
-		// rig the stack
-		emu.Memory[0x034F] = 0x00
-		emu.Memory[0x034F+1] = 0xEE
-		emu.Update()
-		emu.Update()
-		var pc_want uint16 = 0x0202
-		var stack_want uint16 = 0x000
-		pc_got := emu.PC
-		stack_got := emu.Stack[0]
-
-		if stack_got != stack_want {
-			t.Errorf("expected stack[0] to have 0x%03X, got 0x%03X", stack_want, stack_got)
-		}
-
-		if pc_got != pc_want {
-			t.Errorf("expected program counter to have 0x%03X, got 0x%03X", pc_want, pc_got)
-		}
-
-	})
+	var want uint16 = 0x0122
+	got := emu.Index
+	if got != want {
+		t.Errorf("expected index register 0x%03X, got 0x%03X", want, got)
+	}
 }
