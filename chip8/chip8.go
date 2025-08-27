@@ -90,14 +90,14 @@ func (c *Chip8) execute(instruction uint16) error {
 	case 0x0000:
 		switch instruction {
 		case 0x00E0:
-			c.clearDisplay()
+			c.op00E0()
 		case 0x00EE:
-			c.stackPop()
+			c.op00EE()
 		default: // We explicity ignore any other 0x000 instruction
 			return nil
 		}
 	case 0x1000:
-		c.jump(NNN)
+		c.op1NNN(NNN)
 	case 0x2000:
 		c.op2NNN(c.PC)
 		c.PC = NNN

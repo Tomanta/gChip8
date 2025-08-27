@@ -2,13 +2,24 @@ package chip8
 
 import "fmt"
 
-// clear the screen
-func (c *Chip8) clearDisplay() {
+// op00E0 clears the screen
+func (c *Chip8) op00E0() {
 	var blankDisplay [64][32]bool
 	c.Display = blankDisplay
 }
 
-func (c *Chip8) jump(location uint16) {
+// op00EE sets the stack pointer to the top value on the stack (pops)
+func (c *Chip8) op00EE() {
+	if c.stackPointer == 0 {
+		return // Do nothing if stack is empty. Not sure if this is correct behavior.
+	}
+	c.stackPointer -= 1
+	c.PC = c.Stack[c.stackPointer]
+	c.Stack[c.stackPointer] = 0
+}
+
+// op1NNN jumps to memory location NNN
+func (c *Chip8) op1NNN(location uint16) {
 	c.PC = location
 }
 
@@ -20,15 +31,6 @@ func (c *Chip8) op2NNN(address uint16) {
 
 	c.Stack[c.stackPointer] = address
 	c.stackPointer += 1
-}
-
-func (c *Chip8) stackPop() {
-	if c.stackPointer == 0 {
-		return // Do nothing if stack is empty. Not sure if this is correct behavior.
-	}
-	c.stackPointer -= 1
-	c.PC = c.Stack[c.stackPointer]
-	c.Stack[c.stackPointer] = 0
 }
 
 // op6XNN sets register X to NN

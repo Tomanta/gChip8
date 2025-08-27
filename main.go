@@ -28,7 +28,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		for y := range 32 {
 			var y_pos float32 = (float32)(y) * scale
 			if g.emu.Display[x][y] {
-				vector.DrawFilledRect(screen, x_pos, y_pos, 10, 10, color.White, false)
+				vector.DrawFilledRect(screen, x_pos, y_pos, 10, 10, color.RGBA{51, 255, 51, 0}, false)
 			}
 		}
 	}
@@ -39,7 +39,8 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 func openRom() []byte {
-	testRom := "./roms/ibm_logo.ch8"
+	//	testRom := "./roms/ibm_logo.ch8"
+	testRom := "./roms/test_opcode.ch8"
 	data, err := os.ReadFile(testRom)
 	if err != nil {
 		panic("could not open rom")
