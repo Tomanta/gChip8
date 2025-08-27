@@ -101,10 +101,23 @@ func (c *Chip8) execute(instruction uint16) error {
 	case 0x2000:
 		c.op2NNN(c.PC)
 		c.PC = NNN
+	case 0x3000:
+		c.op3XNN(X, NN)
+	case 0x4000:
+		c.op4XNN(X, NN)
+	case 0x5000:
+		c.op5XY0(X, Y)
 	case 0x6000:
-		c.op6XNN((int)(X), NN)
+		c.op6XNN(X, NN)
 	case 0x7000:
-		c.op7XNN((int)(X), NN)
+		c.op7XNN(X, NN)
+	case 0x8000:
+		switch N {
+		case 0:
+			c.op8XY0(X, Y)
+		}
+	case 0x9000:
+		c.op9XY0(X, Y)
 	case 0xA000:
 		c.opANNN(NNN)
 	case 0xD000:

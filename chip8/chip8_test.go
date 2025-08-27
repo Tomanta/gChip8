@@ -168,7 +168,43 @@ func TestOp2NNN(t *testing.T) {
 	if pc_want != pc_got {
 		t.Errorf("expected program counter 0x%03X, got 0x%03X", pc_want, pc_got)
 	}
+}
 
+func TestOp3XNN(t *testing.T) {
+	rom := []byte{0x61, 0x82, 0x31, 0x82, 0xFF, 0xFF, 0x82, 0xEE}
+	emu, _ := NewChip8FromByte(rom)
+	emu.Update() // Set register
+	emu.Update() // Skip next instruction
+	var want_byte byte = 0x82
+	got_byte := emu.Memory[emu.PC]
+	if got_byte != want_byte {
+		t.Errorf("Expected next byte to be 0x%02X, got 0x%02X", want_byte, got_byte)
+	}
+}
+
+func TestOp4XNN(t *testing.T) {
+	rom := []byte{0x61, 0x82, 0x41, 0x85, 0xFF, 0xFF, 0x82, 0xEE}
+	emu, _ := NewChip8FromByte(rom)
+	emu.Update() // Set register
+	emu.Update() // Skip next instruction
+	var want_byte byte = 0x82
+	got_byte := emu.Memory[emu.PC]
+	if got_byte != want_byte {
+		t.Errorf("Expected next byte to be 0x%02X, got 0x%02X", want_byte, got_byte)
+	}
+}
+
+func TestOp5XY0(t *testing.T) {
+	rom := []byte{0x61, 0x82, 0x62, 0x82, 0x51, 0x20, 0xFF, 0xFF, 0x88, 0x92}
+	emu, _ := NewChip8FromByte(rom)
+	emu.Update() // Set register X
+	emu.Update() // Set register Y
+	emu.Update() // Skip next instruction
+	var want_byte byte = 0x88
+	got_byte := emu.Memory[emu.PC]
+	if got_byte != want_byte {
+		t.Errorf("Expected next byte to be 0x%02X, got 0x%02X", want_byte, got_byte)
+	}
 }
 
 func TestOp6XNN(t *testing.T) {
@@ -212,6 +248,32 @@ func TestOp7XNN(t *testing.T) {
 			t.Errorf("expected register 1 to contain 0x%02X, got 0x%02X", want, got)
 		}
 	})
+}
+
+func TestOp8XY0(t *testing.T) {
+	rom := []byte{0x61, 0x82, 0x62, 0x85, 0x81, 0x20}
+	emu, _ := NewChip8FromByte(rom)
+	emu.Update() // Set X
+	emu.Update() // Set y
+	emu.Update() // Set x to y
+	var want byte = 0x85
+	got := emu.Registers[1]
+	if got != want {
+		t.Errorf("expected register 1 to contain 0x%02X, got 0x%02X", want, got)
+	}
+}
+
+func TestOp9XY0(t *testing.T) {
+	rom := []byte{0x61, 0x82, 0x62, 0x85, 0x91, 0x20, 0xFF, 0xFF, 0x88, 0x92}
+	emu, _ := NewChip8FromByte(rom)
+	emu.Update() // Set register X
+	emu.Update() // Set register Y
+	emu.Update() // Skip next instruction
+	var want_byte byte = 0x88
+	got_byte := emu.Memory[emu.PC]
+	if got_byte != want_byte {
+		t.Errorf("Expected next byte to be 0x%02X, got 0x%02X", want_byte, got_byte)
+	}
 }
 
 func TestOpANNN(t *testing.T) {

@@ -1,7 +1,5 @@
 package chip8
 
-import "fmt"
-
 // op00E0 clears the screen
 func (c *Chip8) op00E0() {
 	var blankDisplay [64][32]bool
@@ -33,30 +31,71 @@ func (c *Chip8) op2NNN(address uint16) {
 	c.stackPointer += 1
 }
 
-// op6XNN sets register X to NN
-func (c *Chip8) op6XNN(register int, value uint8) error {
-	if register < 0 || register > 15 {
-		return fmt.Errorf("invalid register: %d", register)
+// op3XNN skips one instruction if register X is equal to NN (adds 2 to Program Counter)
+func (c *Chip8) op3XNN(x uint8, nn uint8) {
+	if c.Registers[x] == nn {
+		c.PC = c.PC + 2
 	}
+}
 
+// op4XNN skips one instruction if register X is not equal to NN (adds 2 to Program Counter)
+func (c *Chip8) op4XNN(x uint8, nn uint8) {
+	if c.Registers[x] != nn {
+		c.PC = c.PC + 2
+	}
+}
+
+// op5XY0 skips one instruction if register X is equal to register Y (adds 2 to Program Counter)
+func (c *Chip8) op5XY0(x uint8, y uint8) {
+	if c.Registers[x] == c.Registers[y] {
+		c.PC = c.PC + 2
+	}
+}
+
+// op6XNN sets register X to NN
+func (c *Chip8) op6XNN(register uint8, value uint8) {
 	c.Registers[register] = value
-	return nil
 }
 
 // op7XNN adds NN to register X. It does not set the overflow flag.
-func (c *Chip8) op7XNN(register int, value uint8) error {
-	if register < 0 || register > 15 {
-		return fmt.Errorf("invalid register: %d", register)
-	}
-
+func (c *Chip8) op7XNN(register uint8, value uint8) {
 	c.Registers[register] = c.Registers[register] + value
-	return nil
+}
+
+// TODO: 8XY0 sets VX to value of VY
+func (c *Chip8) op8XY0(x uint8, y uint8) {
+	c.Registers[x] = c.Registers[y]
+}
+
+// TODO: 8XY1 sets VX to BITWISE OR of VX and VY
+
+// TODO: 8XY2 sets VX to BITWISE AND of VX and VY
+
+// TODO: 8XY4 sets VX to VX plus VY. Will set carry flag.
+
+// TODO: 8XY5 sets VX to VX - VY. See notes on how carry flag works.
+
+// TODO: 8XY6
+
+// TODO: 8XY7 sets VX to VY - VX. See notes on how carry flag works.
+
+// TODO: 8XYE
+
+// op9XY0 skips one instruction if register X is not equal to register Y (adds 2 to Program Counter)
+func (c *Chip8) op9XY0(x uint8, y uint8) {
+	if c.Registers[x] != c.Registers[y] {
+		c.PC = c.PC + 2
+	}
 }
 
 // opANNN sets the Index register to value
 func (c *Chip8) opANNN(value uint16) {
 	c.Index = value
 }
+
+// TODO: BNNN
+
+// TODO: CXNN
 
 // opDXYN draws an N pixel tall sprite from the value at Index
 // drawing is done at coordinates XY. If any pixels are turned off
@@ -95,3 +134,25 @@ func (c *Chip8) opDXYN(x_register uint8, y_register uint8, N uint8) {
 	}
 
 }
+
+// TODO: EX9E
+
+// TODO: EX9A1
+
+// TODO: FX01
+
+// TODO: FX15
+
+// TODO: FX18
+
+// TODO: FX1E
+
+// TODO: FX0A
+
+// TODO: FX29
+
+// TODO: FX33
+
+// TODO: FX55
+
+// TODO: FX65
