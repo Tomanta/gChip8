@@ -78,10 +78,10 @@ func (c *Chip8) opDXYN(x_register uint8, y_register uint8, N uint8) {
 
 			// Any bit that is on will flip the current pixel. Anything turned off sets
 			// register F to 1
-			if c.Display[x_pos][y] && bit == 1 {
+			if c.Display[x_pos][y] && bit == 128 {
 				c.Registers[0xF] = 1
 				c.Display[x_pos][y] = false
-			} else if !c.Display[x_pos][y] && bit == 1 {
+			} else if !c.Display[x_pos][y] && bit == 128 {
 				c.Display[x_pos][y] = true
 			}
 		}
