@@ -136,19 +136,29 @@ func TestOp00EE(t *testing.T) {
 
 }
 
-func TestOp1NNN(t *testing.T) {
-	rom := []byte{0x12, 0x34}
-	emu, _ := NewChip8FromByte(rom)
-	var want uint16 = 0x0234
+var cases = []struct {
+	name        string
+	rom         []byte
+	num_updates int
+	want        uint16
+	got         func(emu Chip8) uint16
+}{
+	{name: "op1NNN jumps to memory location NNN", rom: []byte{0x12, 0x34}, num_updates: 1, want: 0x0234, got: func(emu Chip8) uint16 { return emu.PC }},
+	{name: "op8XY0 sets X to Y", rom: []byte{0x61, 0x82, 0x62, 0x85, 0x81, 0x20}, num_updates: 3, want: 0x85, got: func(emu Chip8) uint16 { return (uint16)(emu.Registers[1]) }},
+}
 
-	err := emu.Update()
-	if err != nil {
-		t.Fatalf("received unexpected error: %v", err)
-	}
-	got := emu.PC
-
-	if emu.PC != want {
-		t.Errorf("1NNN instruction did not advance program counter, wanted %X, got %X", want, got)
+func TestBasicInstructions(t *testing.T) {
+	for _, test := range cases {
+		t.Run(test.name, func(t *testing.T) {
+			emu, _ := NewChip8FromByte(test.rom)
+			for range test.num_updates {
+				emu.Update()
+			}
+			got := test.got(emu)
+			if got != test.want {
+				t.Errorf("Expected 0x%04X, got 0x%04X", got, test.want)
+			}
+		})
 	}
 }
 
@@ -248,19 +258,6 @@ func TestOp7XNN(t *testing.T) {
 			t.Errorf("expected register 1 to contain 0x%02X, got 0x%02X", want, got)
 		}
 	})
-}
-
-func TestOp8XY0(t *testing.T) {
-	rom := []byte{0x61, 0x82, 0x62, 0x85, 0x81, 0x20}
-	emu, _ := NewChip8FromByte(rom)
-	emu.Update() // Set X
-	emu.Update() // Set y
-	emu.Update() // Set x to y
-	var want byte = 0x85
-	got := emu.Registers[1]
-	if got != want {
-		t.Errorf("expected register 1 to contain 0x%02X, got 0x%02X", want, got)
-	}
 }
 
 func TestOp9XY0(t *testing.T) {
