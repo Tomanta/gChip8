@@ -115,6 +115,10 @@ func (c *Chip8) execute(instruction uint16) error {
 		switch N {
 		case 0:
 			c.op8XY0(X, Y)
+		case 1:
+			c.op8XY1(X, Y)
+		case 2:
+			c.op8XY2(X, Y)
 		}
 	case 0x9000:
 		c.op9XY0(X, Y)

@@ -68,8 +68,14 @@ func (c *Chip8) op8XY0(x uint8, y uint8) {
 }
 
 // TODO: 8XY1 sets VX to BITWISE OR of VX and VY
+func (c *Chip8) op8XY1(x uint8, y uint8) {
+	c.Registers[x] = c.Registers[x] | c.Registers[y]
+}
 
 // TODO: 8XY2 sets VX to BITWISE AND of VX and VY
+func (c *Chip8) op8XY2(x uint8, y uint8) {
+	c.Registers[x] = c.Registers[x] & c.Registers[y]
+}
 
 // TODO: 8XY4 sets VX to VX plus VY. Will set carry flag.
 

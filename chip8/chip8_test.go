@@ -145,6 +145,8 @@ var cases = []struct {
 }{
 	{name: "op1NNN jumps to memory location NNN", rom: []byte{0x12, 0x34}, num_updates: 1, want: 0x0234, got: func(emu Chip8) uint16 { return emu.PC }},
 	{name: "op8XY0 sets X to Y", rom: []byte{0x61, 0x82, 0x62, 0x85, 0x81, 0x20}, num_updates: 3, want: 0x85, got: func(emu Chip8) uint16 { return (uint16)(emu.Registers[1]) }},
+	{name: "op8XY1 binary OR X and Y", rom: []byte{0x61, 0x45, 0x62, 0x32, 0x81, 0x21}, num_updates: 3, want: 0x45 | 0x32, got: func(emu Chip8) uint16 { return (uint16)(emu.Registers[1]) }},
+	{name: "op8XY2 binary AND X and Y", rom: []byte{0x61, 0x45, 0x62, 0x42, 0x81, 0x22}, num_updates: 3, want: 0x45 & 0x42, got: func(emu Chip8) uint16 { return (uint16)(emu.Registers[1]) }},
 }
 
 func TestBasicInstructions(t *testing.T) {
@@ -156,7 +158,7 @@ func TestBasicInstructions(t *testing.T) {
 			}
 			got := test.got(emu)
 			if got != test.want {
-				t.Errorf("Expected 0x%04X, got 0x%04X", got, test.want)
+				t.Errorf("Expected 0x%04X, got 0x%04X", test.want, got)
 			}
 		})
 	}
