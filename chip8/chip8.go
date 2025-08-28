@@ -16,6 +16,7 @@ type Chip8 struct {
 	timeStart    time.Time
 	tickDuration time.Duration
 	Registers    [16]uint8 // Variable registers, may need to change this
+	keysPressed  []byte    // Holds a list of all pressed keys
 
 	stackPointer int
 }
@@ -65,6 +66,10 @@ func (c *Chip8) loadFonts() {
 	for i := range fonts {
 		c.Memory[start_mem+i] = fonts[i]
 	}
+}
+
+func (c *Chip8) SetKeysPressed(keys []byte) {
+	c.keysPressed = keys
 }
 
 // Update will process the next instruction. If more than a second has passed since the last tick
@@ -165,6 +170,8 @@ func (c *Chip8) execute(instruction uint16) error {
 		c.op9XY0(X, Y)
 	case 0xA000:
 		c.opANNN(NNN)
+	case 0xB000:
+		c.opBNNN(NNN)
 	case 0xD000:
 		c.opDXYN(X, Y, N)
 	default:

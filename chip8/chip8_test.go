@@ -179,6 +179,7 @@ var cases = []struct {
 	{name: "op8XYE shifts Y one bit to left, stores in X", rom: []byte{0x62, 0xAA, 0x81, 0x2E}, num_updates: 2, want: 0x54, got: func(emu Chip8) uint16 { return (uint16)(emu.Registers[1]) }},
 	{name: "op8XYE sets flag to 0 if left bit is 0", rom: []byte{0x6F, 0x01, 0x62, 0x10, 0x81, 0x2E}, num_updates: 3, want: 0, got: func(emu Chip8) uint16 { return (uint16)(emu.Registers[0xf]) }},
 	{name: "op8XYE sets flag to 1 if left bit is 1", rom: []byte{0x62, 0x80, 0x81, 0x2E}, num_updates: 2, want: 1, got: func(emu Chip8) uint16 { return (uint16)(emu.Registers[0xf]) }},
+	{name: "opBNNN jumps to NNN plus value in V0", rom: []byte{0x60, 0x20, 0xB3, 0x00}, num_updates: 2, want: 0x320, got: func(emu Chip8) uint16 { return emu.PC }},
 }
 
 func TestBasicInstructions(t *testing.T) {

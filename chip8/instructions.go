@@ -148,7 +148,12 @@ func (c *Chip8) opANNN(value uint16) {
 	c.Index = value
 }
 
-// TODO: BNNN
+// opBNNN sets the program counter to NNN plus value in V0
+// Note: Super Chip8 sets the program counter to VX plus NN instead (unclear on exact behavior)
+func (c *Chip8) opBNNN(value uint16) {
+	r_0 := c.Registers[0]
+	c.PC = value + uint16(r_0)
+}
 
 // TODO: CXNN
 

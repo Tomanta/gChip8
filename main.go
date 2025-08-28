@@ -14,8 +14,43 @@ type Game struct {
 	emu chip8.Chip8
 }
 
+func (g *Game) getKeys() []byte {
+	var keys []byte
+	// 123C
+	// 456D
+	// 789E
+	// A0BF
+	if ebiten.IsKeyPressed(ebiten.Key1) {
+		keys = append(keys, 0x1)
+	}
+	if ebiten.IsKeyPressed(ebiten.Key2) {
+		keys = append(keys, 0x2)
+	}
+	if ebiten.IsKeyPressed(ebiten.Key3) {
+		keys = append(keys, 0x3)
+	}
+	if ebiten.IsKeyPressed(ebiten.Key4) {
+		keys = append(keys, 0xC)
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyQ) {
+		keys = append(keys, 0x4)
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyW) {
+		keys = append(keys, 0x5)
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyE) {
+		keys = append(keys, 0x6)
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyR) {
+		keys = append(keys, 0xD)
+	}
+	// TODO: Other 8 keys
+	return keys
+}
+
 // TODO: Figure out how to do this ~700 a second
 func (g *Game) Update() error {
+	g.emu.SetKeysPressed(g.getKeys())
 	g.emu.Update()
 	return nil
 }
