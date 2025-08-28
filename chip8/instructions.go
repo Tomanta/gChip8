@@ -125,7 +125,16 @@ func (c *Chip8) op8XY7(x uint8, y uint8) {
 	}
 }
 
-// TODO: 8XYE
+// op08XYE shifts VY one bit to the left and stores in VX. VF is set to the bit that
+// shifted out.
+// NOTE: Super-CHIP 8 has different behavior that will need to be implemented; it shifts
+// VX in place and ignores Y.
+func (c *Chip8) op8XYE(x uint8, y uint8) {
+	r_x := c.Registers[y]
+	r_f := r_x >> 7 & 0x1
+	c.Registers[0xF] = r_f
+	c.Registers[x] = r_x << 1
+}
 
 // op9XY0 skips one instruction if register X is not equal to register Y (adds 2 to Program Counter)
 func (c *Chip8) op9XY0(x uint8, y uint8) {

@@ -158,6 +158,8 @@ func (c *Chip8) execute(instruction uint16) error {
 			c.op8XY6(X, Y)
 		case 7:
 			c.op8XY7(X, Y)
+		case 0xE:
+			c.op8XYE(X, Y)
 		}
 	case 0x9000:
 		c.op9XY0(X, Y)
