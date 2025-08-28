@@ -77,13 +77,33 @@ func (c *Chip8) op8XY2(x uint8, y uint8) {
 	c.Registers[x] = c.Registers[x] & c.Registers[y]
 }
 
-// TODO: 8XY4 sets VX to VX plus VY. Will set carry flag.
+// TODO: 8XY3 sets VX to XOR of VX and VY
+func (c *Chip8) op8XY3(x uint8, y uint8) {
+	c.Registers[x] = c.Registers[x] ^ c.Registers[y]
+}
 
-// TODO: 8XY5 sets VX to VX - VY. See notes on how carry flag works.
+// TODO: 8XY4 sets VX to VX plus VY. Will set carry flag.
+func (c *Chip8) op8XY4(x uint8, y uint8) {
+	r_x := c.Registers[x]
+	r_y := c.Registers[y]
+	c.Registers[x] = r_x + r_y
+	if (uint16)(r_x)+(uint16)(r_y) > 0xff {
+		c.Registers[0xF] = 1
+	} else {
+		c.Registers[0xF] = 0
+	}
+}
+
+// TODO: 8XY5 sets VX to VX - VY. This does not set the carry flag.
+func (c *Chip8) op8XY5(x uint8, y uint8) {
+	r_x := c.Registers[x]
+	r_y := c.Registers[y]
+	c.Registers[x] = r_x - r_y
+}
 
 // TODO: 8XY6
 
-// TODO: 8XY7 sets VX to VY - VX. See notes on how carry flag works.
+// TODO: 8XY7 sets VX to VY - VX. If X  is larger than Y, VF is set to 1.
 
 // TODO: 8XYE
 

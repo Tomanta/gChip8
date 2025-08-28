@@ -165,6 +165,11 @@ var cases = []struct {
 	{name: "op8XY0 sets X to Y", rom: []byte{0x61, 0x82, 0x62, 0x85, 0x81, 0x20}, num_updates: 3, want: 0x85, got: func(emu Chip8) uint16 { return (uint16)(emu.Registers[1]) }},
 	{name: "op8XY1 binary OR X and Y", rom: []byte{0x61, 0x45, 0x62, 0x32, 0x81, 0x21}, num_updates: 3, want: 0x45 | 0x32, got: func(emu Chip8) uint16 { return (uint16)(emu.Registers[1]) }},
 	{name: "op8XY2 binary AND X and Y", rom: []byte{0x61, 0x45, 0x62, 0x42, 0x81, 0x22}, num_updates: 3, want: 0x45 & 0x42, got: func(emu Chip8) uint16 { return (uint16)(emu.Registers[1]) }},
+	{name: "op8XY3 binary XOR X and Y", rom: []byte{0x61, 0x45, 0x62, 0x42, 0x81, 0x23}, num_updates: 3, want: 0x45 ^ 0x42, got: func(emu Chip8) uint16 { return (uint16)(emu.Registers[1]) }},
+	{name: "op8XY4 adds X and Y into X", rom: []byte{0x61, 0x45, 0x62, 0x42, 0x81, 0x24}, num_updates: 3, want: 0x45 + 0x42, got: func(emu Chip8) uint16 { return (uint16)(emu.Registers[1]) }},
+	{name: "op8xy4 sets overflow flag = 1 if overflow", rom: []byte{0x61, 0xBB, 0x62, 0x88, 0x81, 0x24}, num_updates: 3, want: 0x01, got: func(emu Chip8) uint16 { return (uint16)(emu.Registers[0xF]) }},
+	{name: "op8XY5 subtracts Y from X and stores into X", rom: []byte{0x61, 0x88, 0x62, 0x42, 0x81, 0x25}, num_updates: 3, want: 0x88 - 0x42, got: func(emu Chip8) uint16 { return (uint16)(emu.Registers[1]) }},
+	{name: "op8xy5 does not set overflow flag", rom: []byte{0x61, 0xBB, 0x62, 0x88, 0x81, 0x25}, num_updates: 3, want: 0x00, got: func(emu Chip8) uint16 { return (uint16)(emu.Registers[0xF]) }},
 }
 
 func TestBasicInstructions(t *testing.T) {
