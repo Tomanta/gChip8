@@ -101,7 +101,16 @@ func (c *Chip8) op8XY5(x uint8, y uint8) {
 	c.Registers[x] = r_x - r_y
 }
 
-// TODO: 8XY6
+// op08XY6 shifts VY one bit to the right and stores in VX. VF is set to the bit that
+// shifted out.
+// NOTE: Super-CHIP 8 has different behavior that will need to be implemented; it shifts
+// VX in place and ignores Y.
+func (c *Chip8) op8XY6(x uint8, y uint8) {
+	r_x := c.Registers[y]
+	r_f := 0x01 & r_x
+	c.Registers[0xF] = r_f
+	c.Registers[x] = r_x >> 1
+}
 
 // op8XY7 sets VX to VY - VX. If X is larger than Y, VF is set to 1.
 // Unsure of behavior if both are = but assume it is NOT set since it does not underflow.
