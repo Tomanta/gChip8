@@ -62,27 +62,27 @@ func (c *Chip8) op7XNN(register uint8, value uint8) {
 	c.Registers[register] = c.Registers[register] + value
 }
 
-// TODO: 8XY0 sets VX to value of VY
+// op8XY0 sets VX to value of VY
 func (c *Chip8) op8XY0(x uint8, y uint8) {
 	c.Registers[x] = c.Registers[y]
 }
 
-// TODO: 8XY1 sets VX to BITWISE OR of VX and VY
+// op8XY1 sets VX to BITWISE OR of VX and VY
 func (c *Chip8) op8XY1(x uint8, y uint8) {
 	c.Registers[x] = c.Registers[x] | c.Registers[y]
 }
 
-// TODO: 8XY2 sets VX to BITWISE AND of VX and VY
+// op8XY2 sets VX to BITWISE AND of VX and VY
 func (c *Chip8) op8XY2(x uint8, y uint8) {
 	c.Registers[x] = c.Registers[x] & c.Registers[y]
 }
 
-// TODO: 8XY3 sets VX to XOR of VX and VY
+// op8XY3 sets VX to XOR of VX and VY
 func (c *Chip8) op8XY3(x uint8, y uint8) {
 	c.Registers[x] = c.Registers[x] ^ c.Registers[y]
 }
 
-// TODO: 8XY4 sets VX to VX plus VY. Will set carry flag.
+// op8XY4 sets VX to VX plus VY. Will set carry flag.
 func (c *Chip8) op8XY4(x uint8, y uint8) {
 	r_x := c.Registers[x]
 	r_y := c.Registers[y]
@@ -94,7 +94,7 @@ func (c *Chip8) op8XY4(x uint8, y uint8) {
 	}
 }
 
-// TODO: 8XY5 sets VX to VX - VY. This does not set the carry flag.
+// op8XY5 sets VX to VX - VY. This does not set the carry flag.
 func (c *Chip8) op8XY5(x uint8, y uint8) {
 	r_x := c.Registers[x]
 	r_y := c.Registers[y]
@@ -103,7 +103,18 @@ func (c *Chip8) op8XY5(x uint8, y uint8) {
 
 // TODO: 8XY6
 
-// TODO: 8XY7 sets VX to VY - VX. If X  is larger than Y, VF is set to 1.
+// op8XY7 sets VX to VY - VX. If X is larger than Y, VF is set to 1.
+// Unsure of behavior if both are = but assume it is NOT set since it does not underflow.
+func (c *Chip8) op8XY7(x uint8, y uint8) {
+	r_x := c.Registers[x]
+	r_y := c.Registers[y]
+	c.Registers[x] = r_x - r_y
+	if (uint16)(r_x) >= (uint16)(r_y) {
+		c.Registers[0xF] = 0
+	} else {
+		c.Registers[0xF] = 1
+	}
+}
 
 // TODO: 8XYE
 

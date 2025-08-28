@@ -39,7 +39,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 func openRom() []byte {
-	//	testRom := "./roms/ibm_logo.ch8"
+	// testRom := "./roms/ibm_logo.ch8"
 	testRom := "./roms/test_opcode.ch8"
 	data, err := os.ReadFile(testRom)
 	if err != nil {
