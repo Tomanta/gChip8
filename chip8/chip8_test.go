@@ -65,6 +65,24 @@ func TestCanCreateFromBytes(t *testing.T) {
 		}
 	})
 
+	t.Run("fonts are loaded into memory starting at 0x50", func(t *testing.T) {
+		chip8 := getIBMEmulator(t)
+		var want1 byte = 0xF0
+		var want1_loc uint16 = 0x50
+		var got1 byte = chip8.Memory[want1_loc]
+		if got1 != want1 {
+			t.Errorf("Expected Memory 0x%02X to be 0x%02X, got 0x%02X", want1_loc, want1, got1)
+		}
+
+		var want2 byte = 0x80
+		var want2_loc uint16 = 0x129
+		var got2 byte = chip8.Memory[want2_loc]
+		if got1 != want1 {
+			t.Errorf("Expected Memory 0x%02X to be 0x%02X, got 0x%02X", want2_loc, want2, got2)
+		}
+
+	})
+
 	t.Run("initial display is blank", func(t *testing.T) {
 		want := [64][32]bool{}
 		got := getIBMEmulator(t).Display
