@@ -11,8 +11,8 @@ type Chip8 struct {
 	PC           uint16       // Program counter
 	Index        uint16       // Index register, points to memory locations
 	Stack        [16]uint16
-	cpuTimer     uint8 // Decrements 60 times per second until reaching 0
-	delayTimer   uint8 // Gives beep as long as not 0
+	delayTimer   uint8 // Decrements 60 times per second until reaching 0
+	soundTimer   uint8 // Decrements 60 times per second until reaching 0; should beep
 	timeStart    time.Time
 	tickDuration time.Duration
 	Registers    [16]uint8 // Variable registers, may need to change this
@@ -80,12 +80,12 @@ func (c *Chip8) SetKeysPressed(keys []byte) {
 // count down at most once per execution.
 func (c *Chip8) Update() error {
 	if time.Since(c.timeStart) > c.tickDuration {
-		if c.cpuTimer > 0 {
-			c.cpuTimer -= 1
-		}
-
 		if c.delayTimer > 0 {
 			c.delayTimer -= 1
+		}
+
+		if c.soundTimer > 0 {
+			c.soundTimer -= 1
 		}
 		c.timeStart = time.Now() // start the new tick
 	}
@@ -129,7 +129,7 @@ func (c *Chip8) execute(instruction uint16) error {
 		case 0x00EE:
 			c.op00EE()
 		default: // We explicity ignore any other 0x000 instruction
-			return nil
+			return fmt.Errorf("unknown instruction: %04X", instruction)
 		}
 	case 0x1000:
 		c.op1NNN(NNN)
@@ -166,6 +166,8 @@ func (c *Chip8) execute(instruction uint16) error {
 			c.op8XY7(X, Y)
 		case 0xE:
 			c.op8XYE(X, Y)
+		default:
+			return fmt.Errorf("unknown instruction: %04X", instruction)
 		}
 	case 0x9000:
 		c.op9XY0(X, Y)
@@ -183,6 +185,21 @@ func (c *Chip8) execute(instruction uint16) error {
 			c.opEX9E(X)
 		case 0xA1:
 			c.opEXA1(X)
+		default:
+			return fmt.Errorf("unknown instruction: %04X", instruction)
+		}
+	case 0xF000:
+		switch NN {
+		case 0x07:
+			c.opFX07(X)
+		case 0x15:
+			c.opFX15(X)
+		case 0x18:
+			c.opFX18(X)
+		case 0x1E:
+			c.opFX1E(X)
+		default:
+			return fmt.Errorf("unknown instruction: %04X", instruction)
 		}
 	default:
 		return fmt.Errorf("unknown instruction: %04X", instruction)

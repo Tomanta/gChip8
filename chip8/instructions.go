@@ -243,14 +243,31 @@ func (c *Chip8) opEXA1(x uint8) {
 	c.DebugMsg = "TODO"
 }
 
-// TODO: opFX01 sets VX to the current value of the delay timer
+// opFX07 sets VX to the current value of the delay timer
+func (c *Chip8) opFX07(x uint8) {
+	c.Registers[x] = c.delayTimer
+}
 
-// TODO: opFX15 sets the delay timer to the value of X
+// opFX15 sets the delay timer to the value of X
+func (c *Chip8) opFX15(x uint8) {
+	c.delayTimer = c.Registers[x]
+}
 
-// TODO: opFX18 sets the sound timer to the value of X
+// opFX18 sets the sound timer to the value of X
+func (c *Chip8) opFX18(x uint8) {
+	c.soundTimer = c.Registers[x]
+}
 
-// TODO: opFX1E adds the value of X to the index register. If it overflows from
+// opFX1E adds the value of X to the index register. If it overflows from
 // 0FFF to 1000 it should set VF to 1, this is not standard behavior but is safe
+func (c *Chip8) opFX1E(x uint8) {
+	new_i := c.Index + (uint16)(c.Registers[x])
+	if new_i >= 0x1000 {
+		c.Registers[0xF] = 1
+		new_i -= 0x1000
+	}
+	c.Index = new_i
+}
 
 // TODO: opFX0A blocks until key X is pressed (reduces program counter by 2 if it
 // is NOT pressed)

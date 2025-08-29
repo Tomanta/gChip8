@@ -182,6 +182,13 @@ var cases = []struct {
 	{name: "opBNNN jumps to NNN plus value in V0", rom: []byte{0x60, 0x20, 0xB3, 0x00}, num_updates: 2, want: 0x320, got: func(emu Chip8) uint16 { return emu.PC }},
 	// opEX9E
 	// opEXA1
+	{name: "opFX07 sets VX to value of delay timer", rom: []byte{0x61, 0x30, 0xF1, 0x15, 0xF2, 0x07}, num_updates: 3, want: 0x30, got: func(emu Chip8) uint16 { return uint16(emu.Registers[0x02]) }},
+	{name: "opFX15 sets delay timer to value of X", rom: []byte{0x61, 0x30, 0xF1, 0x15}, num_updates: 2, want: 0x30, got: func(emu Chip8) uint16 { return uint16(emu.delayTimer) }},
+	{name: "opFX18 sets sound timer to value of X", rom: []byte{0x61, 0x30, 0xF1, 0x18}, num_updates: 2, want: 0x30, got: func(emu Chip8) uint16 { return uint16(emu.soundTimer) }},
+	{name: "opFX1E adds the value of VX to Index", rom: []byte{0xA1, 0x11, 0x61, 0x22, 0xF1, 0x1E}, num_updates: 3, want: 0x133, got: func(emu Chip8) uint16 { return uint16(emu.Index) }},
+	{name: "opFX1E sets overflow bit if overflow", rom: []byte{0xAF, 0x88, 0x61, 0x99, 0xF1, 0x1E}, num_updates: 3, want: 0x1, got: func(emu Chip8) uint16 { return uint16(emu.Registers[0xF]) }},
+	{name: "opFX1E sets index correct if overflow", rom: []byte{0xAF, 0x88, 0x61, 0x99, 0xF1, 0x1E}, num_updates: 3, want: 0x021, got: func(emu Chip8) uint16 { return uint16(emu.Index) }},
+	{name: "opFX1E does not set overflow bit if not overflow", rom: []byte{0xA1, 0x11, 0x61, 0x22, 0xF1, 0x1E}, num_updates: 3, want: 0x0, got: func(emu Chip8) uint16 { return uint16(emu.Registers[0xF]) }},
 }
 
 func TestBasicInstructions(t *testing.T) {
