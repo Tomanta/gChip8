@@ -1,9 +1,16 @@
 package chip8
 
+import (
+	"fmt"
+	"math/rand"
+	"slices"
+)
+
 // op00E0 clears the screen
 func (c *Chip8) op00E0() {
 	var blankDisplay [64][32]bool
 	c.Display = blankDisplay
+	c.DebugMsg = "Op00E0: clear screen"
 }
 
 // op00EE sets the stack pointer to the top value on the stack (pops)
@@ -14,11 +21,13 @@ func (c *Chip8) op00EE() {
 	c.stackPointer -= 1
 	c.PC = c.Stack[c.stackPointer]
 	c.Stack[c.stackPointer] = 0
+	c.DebugMsg = fmt.Sprintf("Op00EE: set PC to top of stack (0x%04X)", c.PC)
 }
 
 // op1NNN jumps to memory location NNN
 func (c *Chip8) op1NNN(location uint16) {
 	c.PC = location
+	c.DebugMsg = fmt.Sprintf("Op1NNN: set PC to NNN (0x%04X)", c.PC)
 }
 
 // op2NNN adds NNN to the stack
@@ -29,6 +38,7 @@ func (c *Chip8) op2NNN(address uint16) {
 
 	c.Stack[c.stackPointer] = address
 	c.stackPointer += 1
+	c.DebugMsg = fmt.Sprintf("Op2NNN: push NNN (0x%04X) to stack", address)
 }
 
 // op3XNN skips one instruction if register X is equal to NN (adds 2 to Program Counter)
@@ -36,6 +46,7 @@ func (c *Chip8) op3XNN(x uint8, nn uint8) {
 	if c.Registers[x] == nn {
 		c.PC = c.PC + 2
 	}
+	c.DebugMsg = "TODO"
 }
 
 // op4XNN skips one instruction if register X is not equal to NN (adds 2 to Program Counter)
@@ -43,6 +54,7 @@ func (c *Chip8) op4XNN(x uint8, nn uint8) {
 	if c.Registers[x] != nn {
 		c.PC = c.PC + 2
 	}
+	c.DebugMsg = "TODO"
 }
 
 // op5XY0 skips one instruction if register X is equal to register Y (adds 2 to Program Counter)
@@ -50,36 +62,43 @@ func (c *Chip8) op5XY0(x uint8, y uint8) {
 	if c.Registers[x] == c.Registers[y] {
 		c.PC = c.PC + 2
 	}
+	c.DebugMsg = "TODO"
 }
 
 // op6XNN sets register X to NN
 func (c *Chip8) op6XNN(register uint8, value uint8) {
 	c.Registers[register] = value
+	c.DebugMsg = "TODO"
 }
 
 // op7XNN adds NN to register X. It does not set the overflow flag.
 func (c *Chip8) op7XNN(register uint8, value uint8) {
 	c.Registers[register] = c.Registers[register] + value
+	c.DebugMsg = "TODO"
 }
 
 // op8XY0 sets VX to value of VY
 func (c *Chip8) op8XY0(x uint8, y uint8) {
 	c.Registers[x] = c.Registers[y]
+	c.DebugMsg = "TODO"
 }
 
 // op8XY1 sets VX to BITWISE OR of VX and VY
 func (c *Chip8) op8XY1(x uint8, y uint8) {
 	c.Registers[x] = c.Registers[x] | c.Registers[y]
+	c.DebugMsg = "TODO"
 }
 
 // op8XY2 sets VX to BITWISE AND of VX and VY
 func (c *Chip8) op8XY2(x uint8, y uint8) {
 	c.Registers[x] = c.Registers[x] & c.Registers[y]
+	c.DebugMsg = "TODO"
 }
 
 // op8XY3 sets VX to XOR of VX and VY
 func (c *Chip8) op8XY3(x uint8, y uint8) {
 	c.Registers[x] = c.Registers[x] ^ c.Registers[y]
+	c.DebugMsg = "TODO"
 }
 
 // op8XY4 sets VX to VX plus VY. Will set carry flag.
@@ -92,6 +111,7 @@ func (c *Chip8) op8XY4(x uint8, y uint8) {
 	} else {
 		c.Registers[0xF] = 0
 	}
+	c.DebugMsg = "TODO"
 }
 
 // op8XY5 sets VX to VX - VY. This does not set the carry flag.
@@ -99,6 +119,7 @@ func (c *Chip8) op8XY5(x uint8, y uint8) {
 	r_x := c.Registers[x]
 	r_y := c.Registers[y]
 	c.Registers[x] = r_x - r_y
+	c.DebugMsg = "TODO"
 }
 
 // op08XY6 shifts VY one bit to the right and stores in VX. VF is set to the bit that
@@ -110,6 +131,7 @@ func (c *Chip8) op8XY6(x uint8, y uint8) {
 	r_f := 0x01 & r_x
 	c.Registers[0xF] = r_f
 	c.Registers[x] = r_x >> 1
+	c.DebugMsg = "TODO"
 }
 
 // op8XY7 sets VX to VY - VX. If X is larger than Y, VF is set to 1.
@@ -123,6 +145,7 @@ func (c *Chip8) op8XY7(x uint8, y uint8) {
 	} else {
 		c.Registers[0xF] = 1
 	}
+	c.DebugMsg = "TODO"
 }
 
 // op08XYE shifts VY one bit to the left and stores in VX. VF is set to the bit that
@@ -134,6 +157,7 @@ func (c *Chip8) op8XYE(x uint8, y uint8) {
 	r_f := r_x >> 7 & 0x1
 	c.Registers[0xF] = r_f
 	c.Registers[x] = r_x << 1
+	c.DebugMsg = "TODO"
 }
 
 // op9XY0 skips one instruction if register X is not equal to register Y (adds 2 to Program Counter)
@@ -141,11 +165,13 @@ func (c *Chip8) op9XY0(x uint8, y uint8) {
 	if c.Registers[x] != c.Registers[y] {
 		c.PC = c.PC + 2
 	}
+	c.DebugMsg = "TODO"
 }
 
 // opANNN sets the Index register to value
 func (c *Chip8) opANNN(value uint16) {
 	c.Index = value
+	c.DebugMsg = "TODO"
 }
 
 // opBNNN sets the program counter to NNN plus value in V0
@@ -153,9 +179,15 @@ func (c *Chip8) opANNN(value uint16) {
 func (c *Chip8) opBNNN(value uint16) {
 	r_0 := c.Registers[0]
 	c.PC = value + uint16(r_0)
+	c.DebugMsg = "TODO"
 }
 
-// TODO: CXNN
+// opCXNN generates a random number, ands it with NN, and stores in X
+func (c *Chip8) opCXNN(x uint8, value uint8) {
+	var r uint8 = (uint8)(rand.Intn(0xFF)) & value
+	c.Registers[x] = r
+	c.DebugMsg = "TODO"
+}
 
 // opDXYN draws an N pixel tall sprite from the value at Index
 // drawing is done at coordinates XY. If any pixels are turned off
@@ -192,24 +224,39 @@ func (c *Chip8) opDXYN(x_register uint8, y_register uint8, N uint8) {
 			break
 		}
 	}
-
+	c.DebugMsg = "TODO"
 }
 
-// TODO: EX9E
+// opEX9E skips one instruction if key stored in X is pressed
+func (c *Chip8) opEX9E(x uint8) {
+	if slices.Contains(c.keysPressed, c.Registers[x]) {
+		c.PC = c.PC + 2
+	}
+	c.DebugMsg = "TODO"
+}
 
-// TODO: EX9A1
+// opEXA1 skips one instruction if key stored in X is not pressed
+func (c *Chip8) opEXA1(x uint8) {
+	if slices.Contains(c.keysPressed, c.Registers[x]) {
+		c.PC = c.PC + 2
+	}
+	c.DebugMsg = "TODO"
+}
 
-// TODO: FX01
+// TODO: opFX01 sets VX to the current value of the delay timer
 
-// TODO: FX15
+// TODO: opFX15 sets the delay timer to the value of X
 
-// TODO: FX18
+// TODO: opFX18 sets the sound timer to the value of X
 
-// TODO: FX1E
+// TODO: opFX1E adds the value of X to the index register. If it overflows from
+// 0FFF to 1000 it should set VF to 1, this is not standard behavior but is safe
 
-// TODO: FX0A
+// TODO: opFX0A blocks until key X is pressed (reduces program counter by 2 if it
+// is NOT pressed)
 
-// TODO: FX29
+// TODO: opFX29 sets the Index to the address of the hex character in VX (look up
+// from font table)
 
 // TODO: FX33
 

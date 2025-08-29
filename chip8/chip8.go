@@ -19,6 +19,7 @@ type Chip8 struct {
 	keysPressed  []byte    // Holds a list of all pressed keys
 
 	stackPointer int
+	DebugMsg     string
 }
 
 // NewChip8FromByte takes a slice of bytes and returns a Chip8 emulator with default settings
@@ -172,8 +173,17 @@ func (c *Chip8) execute(instruction uint16) error {
 		c.opANNN(NNN)
 	case 0xB000:
 		c.opBNNN(NNN)
+	case 0xC000:
+		c.opCXNN(X, NN)
 	case 0xD000:
 		c.opDXYN(X, Y, N)
+	case 0xE000:
+		switch NN {
+		case 0x9E:
+			c.opEX9E(X)
+		case 0xA1:
+			c.opEXA1(X)
+		}
 	default:
 		return fmt.Errorf("unknown instruction: %04X", instruction)
 	}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image/color"
 	"log"
 	"os"
@@ -76,6 +77,9 @@ func (g *Game) getKeys() []byte {
 func (g *Game) Update() error {
 	g.emu.SetKeysPressed(g.getKeys())
 	g.emu.Update()
+	if g.emu.DebugMsg != "TODO" {
+		fmt.Println(g.emu.DebugMsg)
+	}
 	return nil
 }
 
