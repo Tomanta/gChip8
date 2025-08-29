@@ -44,7 +44,31 @@ func (g *Game) getKeys() []byte {
 	if ebiten.IsKeyPressed(ebiten.KeyR) {
 		keys = append(keys, 0xD)
 	}
-	// TODO: Other 8 keys
+	if ebiten.IsKeyPressed(ebiten.KeyA) {
+		keys = append(keys, 0x7)
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyS) {
+		keys = append(keys, 0x8)
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyD) {
+		keys = append(keys, 0x9)
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyF) {
+		keys = append(keys, 0xE)
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyZ) {
+		keys = append(keys, 0xA)
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyX) {
+		keys = append(keys, 0x0)
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyC) {
+		keys = append(keys, 0xB)
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyV) {
+		keys = append(keys, 0xF)
+	}
+
 	return keys
 }
 
