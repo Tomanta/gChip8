@@ -4,6 +4,7 @@ import (
 	"image/color"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
@@ -72,13 +73,9 @@ func (g *Game) getKeys() []byte {
 	return keys
 }
 
-// TODO: Figure out how to do this ~700 a second
 func (g *Game) Update() error {
 	g.emu.SetKeysPressed(g.getKeys())
 	g.emu.Update()
-	// if g.emu.DebugMsg != "TODO" {
-	// 	fmt.Println(g.emu.DebugMsg)
-	// }
 	return nil
 }
 
@@ -100,19 +97,28 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 	return 640, 320
 }
 
-func openRom() []byte {
-	testRom := "./roms/breakout.ch8"
-	data, err := os.ReadFile(testRom)
+func openRom(name string) []byte {
+	path := filepath.Join(".", "roms", name)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		panic("could not open rom")
 	}
 	return data
 }
 
+func getRomName() string {
+	result := "ibm_logo.ch8"
+	if len(os.Args) > 1 {
+		result = os.Args[1]
+	}
+	return result
+}
+
 func main() {
 	ebiten.SetWindowSize(640, 320)
 	ebiten.SetTPS(700)
-	romData := openRom()
+
+	romData := openRom(getRomName())
 	emu, _ := chip8.NewChip8FromByte(romData)
 
 	if err := ebiten.RunGame(&Game{emu: emu}); err != nil {
