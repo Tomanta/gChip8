@@ -134,8 +134,8 @@ func (c *Chip8) op8XY5(x uint8, y uint8) {
 func (c *Chip8) op8XY6(x uint8, y uint8) {
 	r_x := c.Registers[y]
 	r_f := 0x01 & r_x
-	c.Registers[0xF] = r_f
 	c.Registers[x] = r_x >> 1
+	c.Registers[0xF] = r_f
 	c.DebugMsg = "TODO"
 }
 
@@ -160,8 +160,8 @@ func (c *Chip8) op8XY7(x uint8, y uint8) {
 func (c *Chip8) op8XYE(x uint8, y uint8) {
 	r_x := c.Registers[y]
 	r_f := r_x >> 7 & 0x1
-	c.Registers[0xF] = r_f
 	c.Registers[x] = r_x << 1
+	c.Registers[0xF] = r_f
 	c.DebugMsg = "TODO"
 }
 
