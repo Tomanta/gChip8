@@ -66,39 +66,39 @@ func (c *Chip8) op5XY0(x uint8, y uint8) {
 }
 
 // op6XNN sets register X to NN
-func (c *Chip8) op6XNN(register uint8, value uint8) {
-	c.Registers[register] = value
-	c.DebugMsg = fmt.Sprintf("Op6XNN: set V%X to %d", register, value)
+func (c *Chip8) op6XNN(x uint8, nn uint8) {
+	c.Registers[x] = nn
+	c.DebugMsg = fmt.Sprintf("Op6XNN: set V%X to %d", x, nn)
 }
 
 // op7XNN adds NN to register X. It does not set the overflow flag.
-func (c *Chip8) op7XNN(register uint8, value uint8) {
-	c.Registers[register] = c.Registers[register] + value
-	c.DebugMsg = fmt.Sprintf("Op7XNN: adds %d to V%X = %d", value, register, c.Registers[register])
+func (c *Chip8) op7XNN(x uint8, nn uint8) {
+	c.Registers[x] = c.Registers[x] + nn
+	c.DebugMsg = fmt.Sprintf("Op7XNN: adds %d to V%X (result: %d)", nn, x, c.Registers[x])
 }
 
 // op8XY0 sets VX to value of VY
 func (c *Chip8) op8XY0(x uint8, y uint8) {
 	c.Registers[x] = c.Registers[y]
-	c.DebugMsg = fmt.Sprintf("Op8XY0: set V%X to V%X", x, y)
+	c.DebugMsg = fmt.Sprintf("Op8XY0: set V%X to V%X, (result: %d)", x, y, c.Registers[x])
 }
 
 // op8XY1 sets VX to BITWISE OR of VX and VY
 func (c *Chip8) op8XY1(x uint8, y uint8) {
 	c.Registers[x] = c.Registers[x] | c.Registers[y]
-	c.DebugMsg = "TODO"
+	c.DebugMsg = fmt.Sprintf("Op8XY1: set V%X to bitwise OR of V%X and V%X (result: %d)", x, x, y, c.Registers[x])
 }
 
 // op8XY2 sets VX to BITWISE AND of VX and VY
 func (c *Chip8) op8XY2(x uint8, y uint8) {
 	c.Registers[x] = c.Registers[x] & c.Registers[y]
-	c.DebugMsg = "TODO"
+	c.DebugMsg = fmt.Sprintf("Op8XY2: set V%X to bitwise AND of V%X and V%X (result: %d)", x, x, y, c.Registers[x])
 }
 
 // op8XY3 sets VX to XOR of VX and VY
 func (c *Chip8) op8XY3(x uint8, y uint8) {
 	c.Registers[x] = c.Registers[x] ^ c.Registers[y]
-	c.DebugMsg = "TODO"
+	c.DebugMsg = fmt.Sprintf("Op8XY3: set V%X to bitwise XOR of V%X and V%X (result: %d)", x, x, y, c.Registers[x])
 }
 
 // op8XY4 sets VX to VX plus VY. Will set carry flag.
@@ -111,7 +111,7 @@ func (c *Chip8) op8XY4(x uint8, y uint8) {
 	} else {
 		c.Registers[0xF] = 0
 	}
-	c.DebugMsg = "TODO"
+	c.DebugMsg = fmt.Sprintf("Op8XY4: set V%X to V%X (%d) + V%X (%d) (result: %d, carry %d)", x, x, r_x, y, r_y, c.Registers[x], c.Registers[0xF])
 }
 
 // op8XY5 sets VX to VX - VY. This does not set the carry flag.
@@ -124,7 +124,7 @@ func (c *Chip8) op8XY5(x uint8, y uint8) {
 	} else {
 		c.Registers[0xF] = 0
 	}
-	c.DebugMsg = "TODO"
+	c.DebugMsg = fmt.Sprintf("Op8XY5: set V%X to V%X (%d) - V%X (%d) (result: %d, carry %d)", x, x, r_x, y, r_y, c.Registers[x], c.Registers[0xF])
 }
 
 // op08XY6 shifts VY one bit to the right and stores in VX. VF is set to the bit that
@@ -136,7 +136,7 @@ func (c *Chip8) op8XY6(x uint8, y uint8) {
 	r_f := 0x01 & r_x
 	c.Registers[x] = r_x >> 1
 	c.Registers[0xF] = r_f
-	c.DebugMsg = "TODO"
+	c.DebugMsg = fmt.Sprintf("Op8XY6: set V%X to V%X (%d) >> 1 (result: %d, carry %d)", x, y, r_x, c.Registers[x], c.Registers[0xF])
 }
 
 // op8XY7 sets VX to VY - VX. If X is larger than Y, VF is set to 1.
@@ -150,7 +150,7 @@ func (c *Chip8) op8XY7(x uint8, y uint8) {
 	} else {
 		c.Registers[0xF] = 0
 	}
-	c.DebugMsg = "TODO"
+	c.DebugMsg = fmt.Sprintf("Op8XY5: set V%X to V%X (%d) - V%X (%d) (result: %d, carry %d)", x, y, r_y, x, r_x, c.Registers[x], c.Registers[0xF])
 }
 
 // op08XYE shifts VY one bit to the left and stores in VX. VF is set to the bit that
@@ -162,7 +162,7 @@ func (c *Chip8) op8XYE(x uint8, y uint8) {
 	r_f := r_x >> 7 & 0x1
 	c.Registers[x] = r_x << 1
 	c.Registers[0xF] = r_f
-	c.DebugMsg = "TODO"
+	c.DebugMsg = fmt.Sprintf("Op8XY6: set V%X to V%X (%d) << 1 (result: %d, carry %d)", x, y, r_x, c.Registers[x], c.Registers[0xF])
 }
 
 // op9XY0 skips one instruction if register X is not equal to register Y (adds 2 to Program Counter)

@@ -101,7 +101,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 func openRom() []byte {
-	testRom := "./roms/key_test.ch8"
+	testRom := "./roms/breakout.ch8"
 	data, err := os.ReadFile(testRom)
 	if err != nil {
 		panic("could not open rom")
