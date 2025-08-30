@@ -101,8 +101,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 func openRom() []byte {
-	// testRom := "./roms/ibm_logo.ch8"
-	testRom := "./roms/test_opcode.ch8"
+	testRom := "./roms/4-flags.ch8"
 	data, err := os.ReadFile(testRom)
 	if err != nil {
 		panic("could not open rom")
@@ -112,6 +111,7 @@ func openRom() []byte {
 
 func main() {
 	ebiten.SetWindowSize(640, 320)
+	ebiten.SetTPS(700)
 	romData := openRom()
 	emu, _ := chip8.NewChip8FromByte(romData)
 
