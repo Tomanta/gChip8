@@ -204,6 +204,10 @@ func (c *Chip8) execute(instruction uint16) error {
 			c.opFX29(X)
 		case 0x33:
 			c.opFX33(X)
+		case 0x55:
+			c.opFX55(X)
+		case 0x65:
+			c.opFX65(X)
 		default:
 			return fmt.Errorf("unknown instruction: %04X", instruction)
 		}

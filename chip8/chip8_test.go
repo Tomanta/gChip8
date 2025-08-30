@@ -197,8 +197,8 @@ var cases = []struct {
 	{name: "opFX33 splits value in VX to 3 digits and stores starting at Index; first digit", rom: []byte{0x61, 0x9C, 0xA5, 0x50, 0xF1, 0x33}, num_updates: 3, want: 1, got: func(emu Chip8) uint16 { return (uint16)(emu.Memory[emu.Index]) }},
 	{name: "opFX33 splits value in VX to 3 digits and stores starting at Index; second digit", rom: []byte{0x61, 0x9C, 0xA5, 0x50, 0xF1, 0x33}, num_updates: 3, want: 5, got: func(emu Chip8) uint16 { return (uint16)(emu.Memory[emu.Index+1]) }},
 	{name: "opFX33 splits value in VX to 3 digits and stores starting at Index; third digit", rom: []byte{0x61, 0x9C, 0xA5, 0x50, 0xF1, 0x33}, num_updates: 3, want: 6, got: func(emu Chip8) uint16 { return (uint16)(emu.Memory[emu.Index+2]) }},
-	// todo: opFX55
-	// todo: opFX65
+	{name: "opFX55 stores V6 in Index + 6", rom: []byte{0x66, 0x9C, 0xA6, 0x50, 0xF6, 0x55}, num_updates: 3, want: 0x9C, got: func(emu Chip8) uint16 { return (uint16)(emu.Memory[emu.Index+6]) }},
+	{name: "opFX65 loads into VX values up to Index + 6", rom: []byte{0x66, 0x9C, 0xA6, 0x50, 0xF6, 0x55, 0x66, 0x00, 0xF6, 0x65}, num_updates: 5, want: 0x9C, got: func(emu Chip8) uint16 { return (uint16)(emu.Registers[6]) }},
 }
 
 func TestBasicInstructions(t *testing.T) {

@@ -312,8 +312,22 @@ func (c *Chip8) opFX33(x uint8) {
 	c.DebugMsg = fmt.Sprintf("OpFX33: storing each digit of %d (Register V%X) into memory starting at index 0x%04X", c.Registers[x], x, c.Index)
 }
 
-// TODO: opFX55 stores each variable register between 0 and X and stores starting at
-// index I
+// opFX55 stores each variable register between 0 and X and stores starting at
+// index I. Modern behavior implemented, I is not changed.
+func (c *Chip8) opFX55(x uint8) {
+	i := c.Index
+	for j := range x + 1 {
+		c.Memory[i+(uint16)(j)] = c.Registers[j]
+	}
+	c.DebugMsg = fmt.Sprintf("OpFX55: storing each register up to %X into memory starting at 0x%04X", x, c.Index)
+}
 
-// TODO: opFX65 takes values starting at index I and loads into each register up between
+// opFX65 takes values starting at index I and loads into each register up between
 // 0 and VX
+func (c *Chip8) opFX65(x uint8) {
+	i := c.Index
+	for j := range x + 1 {
+		c.Registers[j] = c.Memory[i+(uint16)(j)]
+	}
+	c.DebugMsg = fmt.Sprintf("OpFX65: load bytes from memory starting at location 0x%04X into registers up to %X", c.Index, x)
+}
