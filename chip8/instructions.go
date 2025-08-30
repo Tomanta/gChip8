@@ -246,16 +246,19 @@ func (c *Chip8) opEXA1(x uint8) {
 // opFX07 sets VX to the current value of the delay timer
 func (c *Chip8) opFX07(x uint8) {
 	c.Registers[x] = c.delayTimer
+	c.DebugMsg = fmt.Sprintf("OpFX07: set V%X to delay timer: %d", x, c.delayTimer)
 }
 
 // opFX15 sets the delay timer to the value of X
 func (c *Chip8) opFX15(x uint8) {
 	c.delayTimer = c.Registers[x]
+	c.DebugMsg = fmt.Sprintf("OpFX15: set delayTimer to value of V%X: %d", x, c.delayTimer)
 }
 
 // opFX18 sets the sound timer to the value of X
 func (c *Chip8) opFX18(x uint8) {
 	c.soundTimer = c.Registers[x]
+	c.DebugMsg = fmt.Sprintf("OpFX18: set soundTimer to value of V%X: %d", x, c.soundTimer)
 }
 
 // opFX1E adds the value of X to the index register. If it overflows from
@@ -266,6 +269,7 @@ func (c *Chip8) opFX1E(x uint8) {
 		c.Registers[0xF] = 1
 		new_i -= 0x1000
 	}
+	c.DebugMsg = fmt.Sprintf("OpFX1E: add V%X to Index 0x%03X, new value: 0x%03X; Overflow 0x%X", x, c.Index, new_i, c.Registers[0xF])
 	c.Index = new_i
 }
 
