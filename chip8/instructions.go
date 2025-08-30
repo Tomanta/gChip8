@@ -46,7 +46,7 @@ func (c *Chip8) op3XNN(x uint8, nn uint8) {
 	if c.Registers[x] == nn {
 		c.PC = c.PC + 2
 	}
-	c.DebugMsg = "TODO"
+	c.DebugMsg = fmt.Sprintf("Op4XNN: skip next instruction if V%X (%d) equal to (%d)", x, c.Registers[x], nn)
 }
 
 // op4XNN skips one instruction if register X is not equal to NN (adds 2 to Program Counter)
@@ -54,7 +54,7 @@ func (c *Chip8) op4XNN(x uint8, nn uint8) {
 	if c.Registers[x] != nn {
 		c.PC = c.PC + 2
 	}
-	c.DebugMsg = "TODO"
+	c.DebugMsg = fmt.Sprintf("Op4XNN: skip next instruction if V%X (%d) not equal to (%d)", x, c.Registers[x], nn)
 }
 
 // op5XY0 skips one instruction if register X is equal to register Y (adds 2 to Program Counter)
@@ -62,25 +62,25 @@ func (c *Chip8) op5XY0(x uint8, y uint8) {
 	if c.Registers[x] == c.Registers[y] {
 		c.PC = c.PC + 2
 	}
-	c.DebugMsg = "TODO"
+	c.DebugMsg = fmt.Sprintf("Op5XY0: skip next instruction if V%X (%d) equal to V%X (%d)", x, c.Registers[x], y, c.Registers[y])
 }
 
 // op6XNN sets register X to NN
 func (c *Chip8) op6XNN(register uint8, value uint8) {
 	c.Registers[register] = value
-	c.DebugMsg = "TODO"
+	c.DebugMsg = fmt.Sprintf("Op6XNN: set V%X to %d", register, value)
 }
 
 // op7XNN adds NN to register X. It does not set the overflow flag.
 func (c *Chip8) op7XNN(register uint8, value uint8) {
 	c.Registers[register] = c.Registers[register] + value
-	c.DebugMsg = "TODO"
+	c.DebugMsg = fmt.Sprintf("Op7XNN: adds %d to V%X = %d", value, register, c.Registers[register])
 }
 
 // op8XY0 sets VX to value of VY
 func (c *Chip8) op8XY0(x uint8, y uint8) {
 	c.Registers[x] = c.Registers[y]
-	c.DebugMsg = "TODO"
+	c.DebugMsg = fmt.Sprintf("Op8XY0: set V%X to V%X", x, y)
 }
 
 // op8XY1 sets VX to BITWISE OR of VX and VY
@@ -165,13 +165,13 @@ func (c *Chip8) op9XY0(x uint8, y uint8) {
 	if c.Registers[x] != c.Registers[y] {
 		c.PC = c.PC + 2
 	}
-	c.DebugMsg = "TODO"
+	c.DebugMsg = fmt.Sprintf("Op9XY0: skip next instruction if V%X (%d) not equal to V%X (%d)", x, c.Registers[x], y, c.Registers[y])
 }
 
 // opANNN sets the Index register to value
 func (c *Chip8) opANNN(value uint16) {
 	c.Index = value
-	c.DebugMsg = "TODO"
+	c.DebugMsg = fmt.Sprintf("OpANNN: set index to 0x%03X", value)
 }
 
 // opBNNN sets the program counter to NNN plus value in V0
@@ -179,21 +179,24 @@ func (c *Chip8) opANNN(value uint16) {
 func (c *Chip8) opBNNN(value uint16) {
 	r_0 := c.Registers[0]
 	c.PC = value + uint16(r_0)
-	c.DebugMsg = "TODO"
+	c.DebugMsg = fmt.Sprintf("OpBNNN: set program counter to V0 (0x%02X) + 0x%03X: 0x%04X", r_0, value, c.PC)
 }
 
 // opCXNN generates a random number, ands it with NN, and stores in X
 func (c *Chip8) opCXNN(x uint8, value uint8) {
-	var r uint8 = (uint8)(rand.Intn(0xFF)) & value
-	c.Registers[x] = r
-	c.DebugMsg = "TODO"
+	r := (uint8)(rand.Intn(0xFF))
+	result := r & value
+	c.Registers[x] = result
+	c.DebugMsg = fmt.Sprintf("OpCXNN: AND random number (%d) to NN (%d) = %d and store in V%X", r, value, result, x)
 }
 
 // opDXYN draws an N pixel tall sprite from the value at Index
 // drawing is done at coordinates XY. If any pixels are turned off
 // VF is set to 1.
 func (c *Chip8) opDXYN(x_register uint8, y_register uint8, N uint8) {
-	x := c.Registers[x_register] % 64 // Reset this each iteration
+	// Initial position can wrap around the screen, but actual drawing
+	// will not
+	x := c.Registers[x_register] % 64
 	y := c.Registers[y_register] % 32
 	c.Registers[0xF] = 0
 
@@ -224,7 +227,7 @@ func (c *Chip8) opDXYN(x_register uint8, y_register uint8, N uint8) {
 			break
 		}
 	}
-	c.DebugMsg = "TODO"
+	c.DebugMsg = fmt.Sprintf("OpDXYN: draw %d pixel tall sprint starting at (%d, %d)", N, x, y)
 }
 
 // opEX9E skips one instruction if key stored in X is pressed
@@ -232,15 +235,15 @@ func (c *Chip8) opEX9E(x uint8) {
 	if slices.Contains(c.keysPressed, c.Registers[x]) {
 		c.PC = c.PC + 2
 	}
-	c.DebugMsg = "TODO"
+	c.DebugMsg = fmt.Sprintf("OpEXA1: skip next instruction if key stored in V%X (%X) is pressed", x, c.Registers[x])
 }
 
 // opEXA1 skips one instruction if key stored in X is not pressed
 func (c *Chip8) opEXA1(x uint8) {
-	if slices.Contains(c.keysPressed, c.Registers[x]) {
+	if !slices.Contains(c.keysPressed, c.Registers[x]) {
 		c.PC = c.PC + 2
 	}
-	c.DebugMsg = "TODO"
+	c.DebugMsg = fmt.Sprintf("OpEXA1: skip next instruction if key V%X (%X) is not pressed", x, c.Registers[x])
 }
 
 // opFX07 sets VX to the current value of the delay timer
