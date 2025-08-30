@@ -180,8 +180,8 @@ var cases = []struct {
 	{name: "op8XYE sets flag to 0 if left bit is 0", rom: []byte{0x6F, 0x01, 0x62, 0x10, 0x81, 0x2E}, num_updates: 3, want: 0, got: func(emu Chip8) uint16 { return (uint16)(emu.Registers[0xf]) }},
 	{name: "op8XYE sets flag to 1 if left bit is 1", rom: []byte{0x62, 0x80, 0x81, 0x2E}, num_updates: 2, want: 1, got: func(emu Chip8) uint16 { return (uint16)(emu.Registers[0xf]) }},
 	{name: "opBNNN jumps to NNN plus value in V0", rom: []byte{0x60, 0x20, 0xB3, 0x00}, num_updates: 2, want: 0x320, got: func(emu Chip8) uint16 { return emu.PC }},
-	// opEX9E
-	// opEXA1
+	// todo: opEX9E
+	// todo: opEXA1
 	{name: "opFX07 sets VX to value of delay timer", rom: []byte{0x61, 0x30, 0xF1, 0x15, 0xF2, 0x07}, num_updates: 3, want: 0x30, got: func(emu Chip8) uint16 { return uint16(emu.Registers[0x02]) }},
 	{name: "opFX15 sets delay timer to value of X", rom: []byte{0x61, 0x30, 0xF1, 0x15}, num_updates: 2, want: 0x30, got: func(emu Chip8) uint16 { return uint16(emu.delayTimer) }},
 	{name: "opFX18 sets sound timer to value of X", rom: []byte{0x61, 0x30, 0xF1, 0x18}, num_updates: 2, want: 0x30, got: func(emu Chip8) uint16 { return uint16(emu.soundTimer) }},
@@ -189,6 +189,16 @@ var cases = []struct {
 	{name: "opFX1E sets overflow bit if overflow", rom: []byte{0xAF, 0x88, 0x61, 0x99, 0xF1, 0x1E}, num_updates: 3, want: 0x1, got: func(emu Chip8) uint16 { return uint16(emu.Registers[0xF]) }},
 	{name: "opFX1E sets index correct if overflow", rom: []byte{0xAF, 0x88, 0x61, 0x99, 0xF1, 0x1E}, num_updates: 3, want: 0x021, got: func(emu Chip8) uint16 { return uint16(emu.Index) }},
 	{name: "opFX1E does not set overflow bit if not overflow", rom: []byte{0xA1, 0x11, 0x61, 0x22, 0xF1, 0x1E}, num_updates: 3, want: 0x0, got: func(emu Chip8) uint16 { return uint16(emu.Registers[0xF]) }},
+	// todo: opFX0A
+	{name: "opFX29 sets index to font 1", rom: []byte{0x61, 0x01, 0xF1, 0x29}, num_updates: 2, want: 0x0055, got: func(emu Chip8) uint16 { return emu.Index }},
+	{name: "opFX29 sets index to font 0", rom: []byte{0x61, 0x10, 0xF1, 0x29}, num_updates: 2, want: 0x0050, got: func(emu Chip8) uint16 { return emu.Index }},
+	{name: "opFX29 sets index to font F", rom: []byte{0x61, 0x3D, 0xF1, 0x29}, num_updates: 2, want: 0x0091, got: func(emu Chip8) uint16 { return emu.Index }},
+	{name: "opFX29 sets index to font 8", rom: []byte{0x61, 0x08, 0xF1, 0x29}, num_updates: 2, want: 0x0078, got: func(emu Chip8) uint16 { return emu.Index }},
+	{name: "opFX33 splits value in VX to 3 digits and stores starting at Index; first digit", rom: []byte{0x61, 0x9C, 0xA5, 0x50, 0xF1, 0x33}, num_updates: 3, want: 1, got: func(emu Chip8) uint16 { return (uint16)(emu.Memory[emu.Index]) }},
+	{name: "opFX33 splits value in VX to 3 digits and stores starting at Index; second digit", rom: []byte{0x61, 0x9C, 0xA5, 0x50, 0xF1, 0x33}, num_updates: 3, want: 5, got: func(emu Chip8) uint16 { return (uint16)(emu.Memory[emu.Index+1]) }},
+	{name: "opFX33 splits value in VX to 3 digits and stores starting at Index; third digit", rom: []byte{0x61, 0x9C, 0xA5, 0x50, 0xF1, 0x33}, num_updates: 3, want: 6, got: func(emu Chip8) uint16 { return (uint16)(emu.Memory[emu.Index+2]) }},
+	// todo: opFX55
+	// todo: opFX65
 }
 
 func TestBasicInstructions(t *testing.T) {

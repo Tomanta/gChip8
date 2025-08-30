@@ -273,14 +273,44 @@ func (c *Chip8) opFX1E(x uint8) {
 	c.Index = new_i
 }
 
-// TODO: opFX0A blocks until key X is pressed (reduces program counter by 2 if it
-// is NOT pressed)
+// opFX0A blocks until a key is pressed (reduces program counter by 2)
+// The key pressed is stored in register X. If multiple keys are pressed
+// it stores the first one the frontend provided in the slice.
+func (c *Chip8) opFX0A(x uint8) {
+	if len(c.keysPressed) == 0 {
+		c.PC -= 2
+		c.DebugMsg = fmt.Sprintf("OpFX0A: waiting for keypress to store in register 0x%X", x)
+		return
+	}
+	key := c.keysPressed[0]
+	c.Registers[x] = key
+	c.DebugMsg = fmt.Sprintf("OpFX0A: Key 0x%X stored in register 0x%X", key, x)
+}
 
-// TODO: opFX29 sets the Index to the address of the hex character in VX (look up
+// opFX29 sets the Index to the address of the hex character in VX (look up
 // from font table)
+func (c *Chip8) opFX29(x uint8) {
+	font_char := c.Registers[x] & 0x0F
+	var loc uint16 = 0x0050 + (5 * (uint16)(font_char))
+	c.Index = loc
+	c.DebugMsg = fmt.Sprintf("OpFX29: setting index to location of font char 0x%X, i = 0x%04X", font_char, c.Index)
+}
 
-// TODO: FX33
+// opFX33 takes value in VX and splits into three digits stored at in three bytes
+// starting at Index
+func (c *Chip8) opFX33(x uint8) {
+	val := c.Registers[x]
+	d1 := (val / 100) % 10
+	d2 := (val / 10) % 10
+	d3 := val % 10
+	c.Memory[c.Index] = d1
+	c.Memory[c.Index+1] = d2
+	c.Memory[c.Index+2] = d3
+	c.DebugMsg = fmt.Sprintf("OpFX33: storing each digit of %d (Register V%X) into memory starting at index 0x%04X", c.Registers[x], x, c.Index)
+}
 
-// TODO: FX55
+// TODO: opFX55 stores each variable register between 0 and X and stores starting at
+// index I
 
-// TODO: FX65
+// TODO: opFX65 takes values starting at index I and loads into each register up between
+// 0 and VX
